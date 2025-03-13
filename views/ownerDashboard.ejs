@@ -1,0 +1,78 @@
+<% layout("/layouts/boilerplate") %>
+<div class="container mt-4">
+  <h1>Owner Dashboard</h1>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Guest Name</th>
+        <th>Booking Type</th>
+        <th>Date Info</th>
+        <th>Duration / Guests</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% 
+         // Helper function for long-term bookings: compute move-out date.
+         function computeMoveOut(startDate, duration) {
+           const d = new Date(startDate);
+           d.setMonth(d.getMonth() + Number(duration));
+           return d;
+         }
+      %>
+      <% bookings.forEach(booking => { %>
+        <tr>
+          <td>
+            <% if (booking.property) { %>
+              <%= booking.property.title %>
+            <% } else { %>
+              <span class="text-muted">[Property not available]</span>
+            <% } %>
+          </td>
+          <td><%= booking.fullName %></td>
+          <td>
+            <%= booking.bookingType === 'short-term' ? 'Short-Term' : 'Long-Term' %>
+          </td>
+          <td>
+            <% if (booking.bookingType === 'short-term') { 
+                  const checkin = new Date(booking.checkinDate);
+                  const checkout = new Date(booking.checkoutDate);
+            %>
+              <strong>Check-in:</strong> <%= checkin.toLocaleDateString() %><br>
+              <strong>Check-out:</strong> <%= checkout.toLocaleDateString() %>
+            <% } else { 
+                  const moveIn = new Date(booking.startDate);
+                  const moveOut = computeMoveOut(booking.startDate, booking.durationInMonths);
+            %>
+              <strong>Move-in:</strong> <%= moveIn.toLocaleDateString() %><br>
+              <strong>Move-out:</strong> <%= moveOut.toLocaleDateString() %>
+            <% } %>
+          </td>
+          <td>
+            <% if (booking.bookingType === 'short-term') { %>
+              <strong>Guests:</strong> <%= booking.guests %>
+            <% } else { %>
+              <strong>Duration:</strong> <%= booking.durationInMonths %> month<%= booking.durationInMonths > 1 ? 's' : '' %>
+            <% } %>
+          </td>
+          <td>
+            <%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %>
+          </td>
+          <td>
+            <% if (booking.status === 'pending') { %>
+              <form action="/owner/accept" method="POST" style="display:inline;">
+                <input type="hidden" name="bookingId" value="<%= booking._id %>">
+                <button type="submit" class="btn btn-primary btn-sm">Proceed</button>
+              </form>
+            <% } else { %>
+              <span class="text-success">Processed</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+

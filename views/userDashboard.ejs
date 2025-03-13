@@ -1,0 +1,70 @@
+<% layout("/layouts/boilerplate") %>
+<div class="container mt-4">
+  <h1>Your Booking Requests</h1>
+  <ul class="list-group">
+    <% bookings.forEach(booking => { %>
+      <li class="list-group-item">
+        <strong>Property:</strong> 
+        <% if (booking.property) { %>
+          <%= booking.property.title %>
+        <% } else { %>
+          <span class="text-muted">[Property not available]</span>
+        <% } %>
+        <br>
+        <% if (booking.bookingType === "long-term") { 
+             // For long-term booking details
+             const moveIn = new Date(booking.startDate);
+             const moveOut = new Date(booking.startDate);
+             moveOut.setMonth(moveOut.getMonth() + Number(booking.durationInMonths));
+        %>
+          <strong>Move-in Date:</strong> <%= moveIn.toLocaleDateString() %>
+          <br>
+          <strong>Move-out Date:</strong> <%= moveOut.toLocaleDateString() %>
+          <br>
+          <strong>Duration:</strong> <%= booking.durationInMonths %> month<%= booking.durationInMonths > 1 ? 's' : '' %>
+          <br>
+        <% } else if (booking.bookingType === "short-term") { 
+             // For short-term booking details
+             const checkin = new Date(booking.checkinDate);
+             const checkout = new Date(booking.checkoutDate);
+        %>
+          <strong>Check-in Date:</strong> <%= checkin.toLocaleDateString() %>
+          <br>
+          <strong>Check-out Date:</strong> <%= checkout.toLocaleDateString() %>
+          <br>
+          <strong>Guests:</strong> <%= booking.guests %>
+          <br>
+        <% } %>
+        <strong>Status:</strong> <%= booking.status %>
+        <br>
+        <% 
+          // Determine if cancellation is allowed (at least 24 hours before check-in/move-in)
+          const now = new Date();
+          let cancelAllowed = false;
+          if (booking.bookingType === "long-term") {
+            const moveIn = new Date(booking.startDate);
+            const diffInMs = moveIn - now;
+            const hoursDiff = diffInMs / (1000 * 60 * 60);
+            cancelAllowed = (hoursDiff >= 24);
+          } else if (booking.bookingType === "short-term") {
+            const checkin = new Date(booking.checkinDate);
+            const diffInMs = checkin - now;
+            const hoursDiff = diffInMs / (1000 * 60 * 60);
+            cancelAllowed = (hoursDiff >= 24);
+          }
+        %>
+        <% if (booking.status !== "cancelled" && cancelAllowed) { %>
+          <form action="/bookings/<%= booking._id %>/cancel" method="POST" class="mt-2">
+            <button type="submit" class="btn btn-warning btn-sm">
+              <%= booking.bookingType === "short-term" ? "Cancel Booking" : "Cancel Request" %>
+            </button>
+          </form>
+        <% } else if (booking.status !== "cancelled") { %>
+          <small class="text-danger">
+            Cancellation not allowed within 24 hours of <%= booking.bookingType === "short-term" ? "check-in" : "move-in" %>.
+          </small>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+</div>
