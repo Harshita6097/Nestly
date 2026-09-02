@@ -2,10 +2,6 @@
 
 A full-stack rental listing platform where property owners can list rentals and guests can book short-term stays or long-term rentals.
 
-**Live Demo**: [nestly.vercel.app](https://nestly.vercel.app) *(update with your actual URL)*
-
----
-
 ## Features
 
 - **Property Listings** — Owners can create, edit, and delete listings with multiple image uploads
@@ -32,7 +28,6 @@ A full-stack rental listing platform where property owners can list rentals and 
 | Image Storage | Cloudinary + Multer |
 | Session Store | connect-mongo |
 | Validation | Joi |
-| Deployment | Vercel |
 
 ---
 
@@ -130,16 +125,6 @@ Server runs at `http://localhost:8080`
 | GET | `/signup` | Register |
 | POST | `/login` | Login |
 | GET | `/logout` | Logout |
-
----
-
-## Deployment
-
-The project is configured for [Vercel](https://vercel.com) via `vercel.json`. Set all environment variables in your Vercel project settings before deploying.
-
-```bash
-vercel --prod
-```
 
 ---
 
